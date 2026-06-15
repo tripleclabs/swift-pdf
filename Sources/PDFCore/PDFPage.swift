@@ -12,7 +12,21 @@ public final class PDFPage {
     /// milestones; an empty buffer yields a valid (blank) page.
     var content: [UInt8] = []
 
+    /// Fonts referenced by this page, in resource order (`F1`, `F2`, …).
+    private(set) var fonts: [(name: String, font: StandardFont)] = []
+    private var resourceNameByBaseFont: [String: String] = [:]
+
     init(size: PDFPageSize) {
         self.size = size
+    }
+
+    /// Resource name (`F1`, `F2`, …) for `font`, registering it on first use
+    /// and reusing the same name for repeated references.
+    func resourceName(for font: StandardFont) -> String {
+        if let existing = resourceNameByBaseFont[font.baseName] { return existing }
+        let name = "F\(fonts.count + 1)"
+        fonts.append((name, font))
+        resourceNameByBaseFont[font.baseName] = name
+        return name
     }
 }

@@ -11,13 +11,19 @@ public final class DrawingContext {
         var strokeColor: PDFColor = .black
         var fillColor: PDFColor = .black
         var lineWidth: Double = 1
+        var font: StandardFont?
+        var fontSize: Double = 12
+        var fontResource: String?
     }
 
+    private let page: PDFPage?
     private var content: [UInt8] = []
     private var state = State()
     private var stack: [State] = []
 
-    init() {}
+    init(page: PDFPage?) {
+        self.page = page
+    }
 
     /// The accumulated content-stream bytes.
     func finish() -> [UInt8] {
@@ -104,6 +110,56 @@ public final class DrawingContext {
         restoreState()
     }
 
+    // MARK: - Text
+
+    /// Select the font and size used by subsequent `show` calls. Registers the
+    /// font as a page resource.
+    public func setFont(_ font: StandardFont, size: Double) {
+        state.font = font
+        state.fontSize = size
+        state.fontResource = page?.resourceName(for: font) ?? "F1"
+    }
+
+    /// Draw `text` with the current font, with its baseline origin at `point`.
+    /// `setFont(_:size:)` must have been called first.
+    ///
+    /// In this milestone only printable ASCII is encoded; characters outside
+    /// `0x20…0x7E` are dropped (WinAnsi high range arrives with the text layer's
+    /// encoding work).
+    public func show(_ text: String, at point: Point) {
+        guard let resource = state.fontResource else {
+            preconditionFailure("setFont(_:size:) must be called before show(_:at:)")
+        }
+        emit("BT")
+        emit("/\(resource) \(num(state.fontSize)) Tf")
+        emit("\(num(point.x)) \(num(point.y)) Td")
+        var line: [UInt8] = []
+        PDFObject.string(encodableASCII(text)).serialize(into: &line)
+        line.append(contentsOf: Array(" Tj".utf8))
+        emitRaw(line)
+        emit("ET")
+    }
+
+    /// The advance width of `text` in the given font and size (points).
+    public func textWidth(_ text: String, font: StandardFont, size: Double) -> Double {
+        var units = 0
+        for scalar in text.unicodeScalars {
+            units += font.advanceWidth(forCode: Int(scalar.value))
+        }
+        return Double(units) * size / 1000.0
+    }
+
+    /// The advance width of `text` in the current font/size (points).
+    public func textWidth(_ text: String) -> Double {
+        guard let font = state.font else { return 0 }
+        return textWidth(text, font: font, size: state.fontSize)
+    }
+
+    /// Drop characters outside printable ASCII for now (M4 limitation).
+    private func encodableASCII(_ text: String) -> String {
+        String(String.UnicodeScalarView(text.unicodeScalars.filter { $0.value >= 0x20 && $0.value <= 0x7E }))
+    }
+
     // MARK: - Internals
 
     /// Internal access for the text layer (M4) to append raw operators.
@@ -131,6 +187,11 @@ public final class DrawingContext {
         content.append(0x0A)   // newline
     }
 
+    private func emitRaw(_ bytes: [UInt8]) {
+        content.append(contentsOf: bytes)
+        content.append(0x0A)
+    }
+
     private func num(_ v: Double) -> String { PDFObject.formatReal(v) }
 }
 
@@ -138,7 +199,7 @@ extension PDFPage {
     /// Draw onto this page. Operators recorded by the closure are appended to
     /// the page content (multiple `draw` calls accumulate).
     public func draw(_ body: (DrawingContext) -> Void) {
-        let ctx = DrawingContext()
+        let ctx = DrawingContext(page: self)
         body(ctx)
         content.append(contentsOf: ctx.finish())
     }

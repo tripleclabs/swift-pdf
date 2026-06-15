@@ -37,13 +37,24 @@ public final class PDFDocument {
         var kids: [PDFObject] = []
         for page in pages {
             let contentObj = writer.add(.streamObject([], page.content))
+
+            var resourcePairs: [(String, PDFObject)] = []
+            if !page.fonts.isEmpty {
+                var fontSubdict: [(String, PDFObject)] = []
+                for (name, font) in page.fonts {
+                    let fontObj = writer.add(font.fontDictionary())
+                    fontSubdict.append((name, .reference(fontObj)))
+                }
+                resourcePairs.append(("Font", .dict(fontSubdict)))
+            }
+
             let pageObj = writer.add(.dict([
                 ("Type", .name("Page")),
                 ("Parent", .reference(pagesNode)),
                 ("MediaBox", .array([
                     .real(0), .real(0), .real(page.size.width), .real(page.size.height),
                 ])),
-                ("Resources", .dict([])),
+                ("Resources", .dict(resourcePairs)),
                 ("Contents", .reference(contentObj)),
             ]))
             kids.append(.reference(pageObj))
