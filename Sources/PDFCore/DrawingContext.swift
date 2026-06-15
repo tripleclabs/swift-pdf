@@ -184,7 +184,10 @@ public final class DrawingContext {
         case .center: x = rect.minX + (rect.width - w) / 2
         case .right:  x = rect.maxX - w
         }
-        let baseline = rect.maxY - currentAscent()
+        // Place the baseline one em below the top of the rect (treating the rect
+        // as a line box of nominal height = font size). This matches the common
+        // "text sits at the top of the line box" convention.
+        let baseline = rect.maxY - state.fontSize
         show(text, at: Point(x: x, y: baseline))
     }
 
@@ -199,10 +202,6 @@ public final class DrawingContext {
         return font.width(of: text, size: state.fontSize)
     }
 
-    private func currentAscent() -> Double {
-        if let embedded = state.embedded { return embedded.ascent(forSize: state.fontSize) }
-        return state.font?.ascent(forSize: state.fontSize) ?? state.fontSize
-    }
 
     /// The advance width of `text` in the current font/size (points).
     public func textWidth(_ text: String) -> Double {
