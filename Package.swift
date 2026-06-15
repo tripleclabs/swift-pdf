@@ -18,14 +18,22 @@ let package = Package(
         // Pure Swift, no dependencies. Original work against ISO 32000.
         .target(name: "PDFCore"),
 
-        // Public umbrella. For now it just re-exports PDFCore; later milestones
-        // wire in PDFFlate / PDFFonts / PDFImage here.
-        .target(name: "SwiftPDF", dependencies: ["PDFCore"]),
+        // zlib (standard locations on macOS SDK and Linux; no pkg-config needed).
+        .systemLibrary(name: "CZlib"),
+
+        // FlateDecode stream compression. Links zlib; depends on PDFCore's
+        // StreamCompressor protocol.
+        .target(name: "PDFFlate", dependencies: ["PDFCore", "CZlib"]),
+
+        // Public umbrella. Re-exports PDFCore and wires in the optional
+        // capability layers (PDFFlate now; PDFFonts / PDFImage later).
+        .target(name: "SwiftPDF", dependencies: ["PDFCore", "PDFFlate"]),
 
         // Dev CLI: `swift run samples [output-dir]` writes showcase PDFs so the
         // current feature set can be eyeballed in a real viewer.
         .executableTarget(name: "samples", dependencies: ["SwiftPDF"]),
 
         .testTarget(name: "PDFCoreTests", dependencies: ["PDFCore"]),
+        .testTarget(name: "SwiftPDFTests", dependencies: ["SwiftPDF", "CZlib"]),
     ]
 )

@@ -14,6 +14,10 @@ public final class PDFDocument {
     /// The pages, in order.
     public private(set) var pages: [PDFPage] = []
 
+    /// Optional stream compressor. When set (e.g. to a `FlateCompressor`),
+    /// stream payloads are compressed if that yields smaller output.
+    public var compressor: StreamCompressor?
+
     public init(metadata: PDFMetadata = PDFMetadata()) {
         self.metadata = metadata
     }
@@ -36,7 +40,7 @@ public final class PDFDocument {
 
         var kids: [PDFObject] = []
         for page in pages {
-            let contentObj = writer.add(.streamObject([], page.content))
+            let contentObj = writer.add(makeStream([], page.content))
 
             var resourcePairs: [(String, PDFObject)] = []
             if !page.fonts.isEmpty {
@@ -77,5 +81,14 @@ public final class PDFDocument {
         }
 
         return writer.build(rootRef: catalog, infoRef: infoRef)
+    }
+
+    /// Build a stream object, applying `compressor` when it produces something
+    /// smaller than the raw payload.
+    private func makeStream(_ extra: [(String, PDFObject)], _ data: [UInt8]) -> PDFObject {
+        if let compressor, let result = compressor.compress(data), result.bytes.count < data.count {
+            return .streamObject(extra + [("Filter", .name(result.filter))], result.bytes)
+        }
+        return .streamObject(extra, data)
     }
 }
