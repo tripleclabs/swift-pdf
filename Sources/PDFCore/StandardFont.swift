@@ -71,6 +71,11 @@ public enum StandardFont: Sendable, CaseIterable, Equatable {
         return widths[code - 0x20]
     }
 
+    /// Ascent (baseline to top) at `size` points.
+    public func ascent(forSize size: Double) -> Double {
+        Double(ascender) * size / 1000
+    }
+
     /// Advance width of `text` at `size` points (context-free; usable for
     /// layout before any page exists). Only printable ASCII is measured in M4.
     public func width(of text: String, size: Double) -> Double {

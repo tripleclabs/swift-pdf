@@ -22,6 +22,9 @@ public protocol EmbeddedFont: AnyObject {
     /// Advance width of `text` at `size` points, with no side effects.
     func width(of text: String, size: Double) -> Double
 
+    /// Ascent (distance from baseline to top) at `size` points.
+    func ascent(forSize size: Double) -> Double
+
     /// Subset and emit this font into `writer`, returning the `/Font`
     /// dictionary's object number. Called once per document.
     func buildFontObject(into writer: PDFWriter) -> Int

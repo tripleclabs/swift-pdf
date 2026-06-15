@@ -172,9 +172,36 @@ public final class DrawingContext {
         emit("ET")
     }
 
+    /// Draw a single line of `text`, horizontally aligned within `rect`, with
+    /// its baseline placed an ascent below the top of the rect (so the text sits
+    /// at the top of the box). Does not wrap — callers that need multi-line text
+    /// break it into lines and call this per line.
+    public func show(_ text: String, in rect: Rectangle, alignment: TextAlignment = .left) {
+        let w = currentTextWidth(text)
+        let x: Double
+        switch alignment {
+        case .left:   x = rect.minX
+        case .center: x = rect.minX + (rect.width - w) / 2
+        case .right:  x = rect.maxX - w
+        }
+        let baseline = rect.maxY - currentAscent()
+        show(text, at: Point(x: x, y: baseline))
+    }
+
     /// The advance width of `text` in the given font and size (points).
     public func textWidth(_ text: String, font: StandardFont, size: Double) -> Double {
         font.width(of: text, size: size)
+    }
+
+    private func currentTextWidth(_ text: String) -> Double {
+        if let embedded = state.embedded { return embedded.width(of: text, size: state.fontSize) }
+        guard let font = state.font else { return 0 }
+        return font.width(of: text, size: state.fontSize)
+    }
+
+    private func currentAscent() -> Double {
+        if let embedded = state.embedded { return embedded.ascent(forSize: state.fontSize) }
+        return state.font?.ascent(forSize: state.fontSize) ?? state.fontSize
     }
 
     /// The advance width of `text` in the current font/size (points).

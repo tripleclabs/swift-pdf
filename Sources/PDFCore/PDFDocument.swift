@@ -30,6 +30,12 @@ public final class PDFDocument {
         return page
     }
 
+    /// Append a new page of the given dimensions (points) and return it.
+    @discardableResult
+    public func addPage(width: Double, height: Double) -> PDFPage {
+        addPage(size: PDFPageSize(width: width, height: height))
+    }
+
     /// Render the document to PDF bytes.
     public func data() -> Data {
         let writer = PDFWriter()

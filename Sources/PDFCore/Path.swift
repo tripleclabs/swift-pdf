@@ -62,6 +62,9 @@ public struct Path: Equatable, Sendable {
     public static func rect(_ r: Rectangle) -> Path {
         var p = Path(); p.addRect(r); return p
     }
+    public static func rect(x: Double, y: Double, width: Double, height: Double) -> Path {
+        rect(Rectangle(x: x, y: y, width: width, height: height))
+    }
     public static func ellipse(in r: Rectangle) -> Path {
         var p = Path(); p.addEllipse(in: r); return p
     }

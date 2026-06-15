@@ -41,6 +41,10 @@ public final class TrueTypeFont: EmbeddedFont {
         return Double(advance) * size / Double(hb.unitsPerEm)
     }
 
+    public func ascent(forSize size: Double) -> Double {
+        Double(hb.extents.ascender) * size / Double(hb.unitsPerEm)
+    }
+
     public func encode(_ text: String, size: Double) -> (operand: [UInt8], width: Double) {
         let scalarsByOffset = Self.scalarsByUTF8Offset(text)
         var operand: [UInt8] = []
