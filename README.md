@@ -135,8 +135,9 @@ make samples    # swift run samples
 
 ## Roadmap
 
-Beyond the MVP: annotations, outlines/bookmarks, page labels, encryption,
-CJK fonts/encodings, and a higher-level layout/`Grid` helper.
+See [ROADMAP.md](ROADMAP.md). Near-term: hyperlinks/annotations, outlines,
+stream compression for fonts/images, page labels, richer text controls. Later:
+shadings/gradients, encryption, a reusable layout layer, and more.
 
 ## License
 
