@@ -1,4 +1,4 @@
-// Copyright (c) 2026 the swift-pdf authors.
+// Copyright (c) 2026 Triple C Labs GmbH.
 // SPDX-License-Identifier: MIT
 
 /// A single page in a document. In M2 a page carries its size and a content

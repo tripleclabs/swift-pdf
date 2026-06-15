@@ -1,4 +1,4 @@
-// Copyright (c) 2026 the swift-pdf authors.
+// Copyright (c) 2026 Triple C Labs GmbH.
 // SPDX-License-Identifier: MIT
 
 // Public umbrella for swift-pdf. Re-exports the pure-Swift core so consumers

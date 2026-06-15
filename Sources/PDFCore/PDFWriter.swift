@@ -1,4 +1,4 @@
-// Copyright (c) 2026 the swift-pdf authors.
+// Copyright (c) 2026 Triple C Labs GmbH.
 // SPDX-License-Identifier: MIT
 //
 // Original work implementing PDF file structure per ISO 32000-1 (§7.5).

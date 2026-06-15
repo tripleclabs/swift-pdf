@@ -1,4 +1,4 @@
-// Copyright (c) 2026 the swift-pdf authors.
+// Copyright (c) 2026 Triple C Labs GmbH.
 // SPDX-License-Identifier: MIT
 
 /// A page size in PDF points (1/72 inch). Width/height define the MediaBox.
