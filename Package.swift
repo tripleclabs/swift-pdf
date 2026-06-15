@@ -25,6 +25,17 @@ let package = Package(
         // StreamCompressor protocol.
         .target(name: "PDFFlate", dependencies: ["PDFCore", "CZlib"]),
 
+        // HarfBuzz (shaping + subsetting). harfbuzz-subset.pc transitively
+        // links harfbuzz. Needs PKG_CONFIG_PATH set to brew's pkgconfig on macOS.
+        .systemLibrary(
+            name: "CHarfBuzz",
+            pkgConfig: "harfbuzz-subset",
+            providers: [.apt(["libharfbuzz-dev"]), .brew(["harfbuzz"])]
+        ),
+
+        // TTF/OTF font loading, shaping, subsetting, and embedding via HarfBuzz.
+        .target(name: "PDFFonts", dependencies: ["PDFCore", "CHarfBuzz"]),
+
         // Public umbrella. Re-exports PDFCore and wires in the optional
         // capability layers (PDFFlate now; PDFFonts / PDFImage later).
         .target(name: "SwiftPDF", dependencies: ["PDFCore", "PDFFlate"]),
@@ -35,5 +46,7 @@ let package = Package(
 
         .testTarget(name: "PDFCoreTests", dependencies: ["PDFCore"]),
         .testTarget(name: "SwiftPDFTests", dependencies: ["SwiftPDF", "CZlib"]),
+        .testTarget(name: "PDFFontsTests", dependencies: ["PDFFonts"],
+                    resources: [.copy("Fixtures")]),
     ]
 )
