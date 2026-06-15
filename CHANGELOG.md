@@ -7,7 +7,10 @@ All notable changes to this project are documented here. The format is based on
 ## [Unreleased]
 
 ### Added
-- GitHub Actions CI (Linux full, Linux `PDFCore`-only, macOS).
+- GitHub Actions CI (Linux amd64 + arm64 full, Linux `PDFCore`-only, macOS).
+
+### Changed
+- Require **Swift 6.3+** (Swift 6 language mode) and **macOS 26+**.
 
 ## [0.1.0]
 

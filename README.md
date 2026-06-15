@@ -127,10 +127,11 @@ make test       # swift test  (sets PKG_CONFIG_PATH on macOS)
 make samples    # swift run samples
 ```
 
-## Platform support
+## Requirements
 
-- **Linux** (the primary target — server-side PDF generation)
-- **macOS** (development & CI)
+- **Swift 6.3+**
+- **Linux** — the primary target (server-side PDF generation); **x86_64 and arm64**
+- **macOS 26+** — development & CI
 
 ## Roadmap
 

@@ -1,4 +1,4 @@
-// swift-tools-version:5.9
+// swift-tools-version:6.3
 import PackageDescription
 
 // swift-pdf — a pure-Swift PDF generation library.
@@ -10,6 +10,7 @@ import PackageDescription
 // full target map; this manifest grows milestone by milestone.
 let package = Package(
     name: "swift-pdf",
+    platforms: [.macOS("26.0")],
     products: [
         .library(name: "SwiftPDF", targets: ["SwiftPDF"]),
         .library(name: "PDFCore", targets: ["PDFCore"]),

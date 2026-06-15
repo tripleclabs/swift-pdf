@@ -13,7 +13,7 @@ jobs:
   linux:
     name: Linux ${{ matrix.arch }} (Swift, full)
     runs-on: ${{ matrix.runner }}
-    container: swift:6.1
+    container: swift:6.3
     strategy:
       fail-fast: false
       matrix:
@@ -36,7 +36,7 @@ jobs:
   linux-core-only:
     name: Linux (PDFCore, no native deps)
     runs-on: ubuntu-latest
-    container: swift:6.1
+    container: swift:6.3
     steps:
       - uses: actions/checkout@v4
       # Deliberately install NOTHING — proves PDFCore (base-14 text + vector
@@ -48,7 +48,7 @@ jobs:
 
   macos:
     name: macOS (Swift, full)
-    runs-on: macos-14
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
       - name: Install native dependencies
