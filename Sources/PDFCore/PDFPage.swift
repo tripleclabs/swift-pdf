@@ -43,4 +43,17 @@ public final class PDFPage {
         resourceNameByKey[key] = name
         return name
     }
+
+    /// Images referenced by this page, in resource order (`Im1`, `Im2`, …).
+    private(set) var images: [(name: String, image: PDFImageData)] = []
+    private var imageResourceByKey: [String: String] = [:]
+
+    /// Resource name (`Im1`, …) for an image, registering on first use.
+    func imageResourceName(for image: PDFImageData) -> String {
+        if let existing = imageResourceByKey[image.key] { return existing }
+        let name = "Im\(images.count + 1)"
+        images.append((name, image))
+        imageResourceByKey[image.key] = name
+        return name
+    }
 }

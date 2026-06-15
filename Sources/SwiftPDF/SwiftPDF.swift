@@ -6,6 +6,7 @@
 @_exported import PDFCore
 @_exported import PDFFlate
 @_exported import PDFFonts
+@_exported import PDFImage
 
 extension PDFDocument {
     /// Enable FlateDecode compression of stream payloads (links zlib).

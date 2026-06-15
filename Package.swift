@@ -36,9 +36,19 @@ let package = Package(
         // TTF/OTF font loading, shaping, subsetting, and embedding via HarfBuzz.
         .target(name: "PDFFonts", dependencies: ["PDFCore", "CHarfBuzz"]),
 
+        // libpng (standard pkg-config name "libpng").
+        .systemLibrary(
+            name: "CLibPNG",
+            pkgConfig: "libpng",
+            providers: [.apt(["libpng-dev"]), .brew(["libpng"])]
+        ),
+
+        // Image decoding/embedding: PNG via libpng, JPEG via DCTDecode passthrough.
+        .target(name: "PDFImage", dependencies: ["PDFCore", "CLibPNG"]),
+
         // Public umbrella. Re-exports PDFCore and wires in the optional
-        // capability layers (PDFFlate, PDFFonts; PDFImage later).
-        .target(name: "SwiftPDF", dependencies: ["PDFCore", "PDFFlate", "PDFFonts"]),
+        // capability layers (PDFFlate, PDFFonts, PDFImage).
+        .target(name: "SwiftPDF", dependencies: ["PDFCore", "PDFFlate", "PDFFonts", "PDFImage"]),
 
         // Dev CLI: `swift run samples [output-dir]` writes showcase PDFs so the
         // current feature set can be eyeballed in a real viewer.
@@ -47,6 +57,8 @@ let package = Package(
         .testTarget(name: "PDFCoreTests", dependencies: ["PDFCore"]),
         .testTarget(name: "SwiftPDFTests", dependencies: ["SwiftPDF", "CZlib"]),
         .testTarget(name: "PDFFontsTests", dependencies: ["PDFFonts", "PDFCore"],
+                    resources: [.copy("Fixtures")]),
+        .testTarget(name: "PDFImageTests", dependencies: ["PDFImage", "PDFCore"],
                     resources: [.copy("Fixtures")]),
     ]
 )

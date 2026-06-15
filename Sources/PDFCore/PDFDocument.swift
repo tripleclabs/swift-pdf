@@ -56,6 +56,41 @@ public final class PDFDocument {
             }
         }
 
+        // Build each unique image XObject once per document.
+        var imageObjByKey: [String: Int] = [:]
+        func imageObject(_ image: PDFImageData) -> Int {
+            if let n = imageObjByKey[image.key] { return n }
+            var dict: [(String, PDFObject)] = [
+                ("Type", .name("XObject")),
+                ("Subtype", .name("Image")),
+                ("Width", .integer(image.width)),
+                ("Height", .integer(image.height)),
+                ("BitsPerComponent", .integer(image.bitsPerComponent)),
+                ("ColorSpace", .name(image.colorSpace.rawValue)),
+            ]
+            if let mask = image.softMask {
+                let maskObj = writer.add(makeStream([
+                    ("Type", .name("XObject")),
+                    ("Subtype", .name("Image")),
+                    ("Width", .integer(mask.width)),
+                    ("Height", .integer(mask.height)),
+                    ("BitsPerComponent", .integer(8)),
+                    ("ColorSpace", .name("DeviceGray")),
+                ], mask.data))
+                dict.append(("SMask", .reference(maskObj)))
+            }
+            let obj: Int
+            if let filter = image.filter {
+                // Already encoded (e.g. JPEG / DCTDecode) — embed as-is.
+                obj = writer.add(.streamObject(dict + [("Filter", .name(filter))], image.data))
+            } else {
+                // Raw samples — let the document compressor (if any) apply Flate.
+                obj = writer.add(makeStream(dict, image.data))
+            }
+            imageObjByKey[image.key] = obj
+            return obj
+        }
+
         var kids: [PDFObject] = []
         for page in pages {
             let contentObj = writer.add(makeStream([], page.content))
@@ -67,6 +102,13 @@ public final class PDFDocument {
                     fontSubdict.append((name, .reference(objectNumber(for: ref))))
                 }
                 resourcePairs.append(("Font", .dict(fontSubdict)))
+            }
+            if !page.images.isEmpty {
+                var xobjectSubdict: [(String, PDFObject)] = []
+                for (name, image) in page.images {
+                    xobjectSubdict.append((name, .reference(imageObject(image))))
+                }
+                resourcePairs.append(("XObject", .dict(xobjectSubdict)))
             }
 
             let pageObj = writer.add(.dict([

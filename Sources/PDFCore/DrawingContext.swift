@@ -100,6 +100,19 @@ public final class DrawingContext {
         emitPath(path); emit(rule == .evenOdd ? "B*" : "B")
     }
 
+    // MARK: - Images
+
+    /// Draw `image` to fill `rect` (in page coordinates). Registers the image as
+    /// a page XObject resource and emits the placement operators.
+    public func draw(_ image: PDFImageData, in rect: Rectangle) {
+        let name = page?.imageResourceName(for: image) ?? "Im1"
+        saveState()
+        // Map the image's unit square onto rect.
+        concatenate(AffineTransform(a: rect.width, b: 0, c: 0, d: rect.height, tx: rect.x, ty: rect.y))
+        emit("/\(name) Do")
+        restoreState()
+    }
+
     /// Intersect the clip region with `path` for the duration of `body`
     /// (scoped by an implicit save/restore).
     public func clip(to path: Path, rule: FillRule = .nonZero, _ body: () -> Void) {
