@@ -40,11 +40,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       # Deliberately install NOTHING — proves PDFCore (base-14 text + vector
-      # graphics) builds and tests with zero native dependencies.
-      - name: Build PDFCore
+      # graphics) builds and links with zero native dependencies. (PDFCore's
+      # tests run in the full Linux job; `swift test` here would build the whole
+      # test bundle, which links harfbuzz/libpng.)
+      - name: Build PDFCore (no native deps)
         run: swift build --target PDFCore
-      - name: Test PDFCore
-        run: swift test --filter PDFCoreTests
 
   macos:
     name: macOS (Swift, full)
