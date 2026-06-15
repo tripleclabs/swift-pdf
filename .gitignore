@@ -4,4 +4,5 @@ Package.resolved
 *.xcodeproj
 out/
 .DS_Store
-Samples/
+# Root-level sample OUTPUT dir only (anchored so it does not match Sources/samples).
+/Samples/
