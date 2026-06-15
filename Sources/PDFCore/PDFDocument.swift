@@ -38,6 +38,24 @@ public final class PDFDocument {
         let catalog = writer.reserve()
         let pagesNode = writer.reserve()
 
+        // Build each unique font once per document; pages reference by name.
+        var standardFontObjByBase: [String: Int] = [:]
+        var embeddedFontObjByKey: [String: Int] = [:]
+        func objectNumber(for ref: PDFPage.FontRef) -> Int {
+            switch ref {
+            case .standard(let font):
+                if let n = standardFontObjByBase[font.baseName] { return n }
+                let n = writer.add(font.fontDictionary())
+                standardFontObjByBase[font.baseName] = n
+                return n
+            case .embedded(let font):
+                if let n = embeddedFontObjByKey[font.fontKey] { return n }
+                let n = font.buildFontObject(into: writer)
+                embeddedFontObjByKey[font.fontKey] = n
+                return n
+            }
+        }
+
         var kids: [PDFObject] = []
         for page in pages {
             let contentObj = writer.add(makeStream([], page.content))
@@ -45,9 +63,8 @@ public final class PDFDocument {
             var resourcePairs: [(String, PDFObject)] = []
             if !page.fonts.isEmpty {
                 var fontSubdict: [(String, PDFObject)] = []
-                for (name, font) in page.fonts {
-                    let fontObj = writer.add(font.fontDictionary())
-                    fontSubdict.append((name, .reference(fontObj)))
+                for (name, ref) in page.fonts {
+                    fontSubdict.append((name, .reference(objectNumber(for: ref))))
                 }
                 resourcePairs.append(("Font", .dict(fontSubdict)))
             }

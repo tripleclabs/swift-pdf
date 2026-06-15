@@ -12,21 +12,35 @@ public final class PDFPage {
     /// milestones; an empty buffer yields a valid (blank) page.
     var content: [UInt8] = []
 
+    /// A font referenced by a page: either a standard-14 font or an embedded one.
+    enum FontRef {
+        case standard(StandardFont)
+        case embedded(EmbeddedFont)
+    }
+
     /// Fonts referenced by this page, in resource order (`F1`, `F2`, …).
-    private(set) var fonts: [(name: String, font: StandardFont)] = []
-    private var resourceNameByBaseFont: [String: String] = [:]
+    private(set) var fonts: [(name: String, font: FontRef)] = []
+    private var resourceNameByKey: [String: String] = [:]
 
     init(size: PDFPageSize) {
         self.size = size
     }
 
-    /// Resource name (`F1`, `F2`, …) for `font`, registering it on first use
-    /// and reusing the same name for repeated references.
+    /// Resource name (`F1`, `F2`, …) for a standard font, registering on first use.
     func resourceName(for font: StandardFont) -> String {
-        if let existing = resourceNameByBaseFont[font.baseName] { return existing }
+        register(key: "std:" + font.baseName) { .standard(font) }
+    }
+
+    /// Resource name (`F1`, `F2`, …) for an embedded font, registering on first use.
+    func resourceName(for font: EmbeddedFont) -> String {
+        register(key: "emb:" + font.fontKey) { .embedded(font) }
+    }
+
+    private func register(key: String, _ make: () -> FontRef) -> String {
+        if let existing = resourceNameByKey[key] { return existing }
         let name = "F\(fonts.count + 1)"
-        fonts.append((name, font))
-        resourceNameByBaseFont[font.baseName] = name
+        fonts.append((name, make()))
+        resourceNameByKey[key] = name
         return name
     }
 }

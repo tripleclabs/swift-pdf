@@ -12,6 +12,7 @@ public final class DrawingContext {
         var fillColor: PDFColor = .black
         var lineWidth: Double = 1
         var font: StandardFont?
+        var embedded: EmbeddedFont?
         var fontSize: Double = 12
         var fontResource: String?
     }
@@ -116,6 +117,15 @@ public final class DrawingContext {
     /// font as a page resource.
     public func setFont(_ font: StandardFont, size: Double) {
         state.font = font
+        state.embedded = nil
+        state.fontSize = size
+        state.fontResource = page?.resourceName(for: font) ?? "F1"
+    }
+
+    /// Select an embedded (TTF/OTF) font and size for subsequent `show` calls.
+    public func setFont(_ font: EmbeddedFont, size: Double) {
+        state.embedded = font
+        state.font = nil
         state.fontSize = size
         state.fontResource = page?.resourceName(for: font) ?? "F1"
     }
@@ -134,7 +144,16 @@ public final class DrawingContext {
         emit("/\(resource) \(num(state.fontSize)) Tf")
         emit("\(num(point.x)) \(num(point.y)) Td")
         var line: [UInt8] = []
-        PDFObject.string(encodableASCII(text)).serialize(into: &line)
+        if let embedded = state.embedded {
+            let (operand, _) = embedded.encode(text, size: state.fontSize)
+            if embedded.usesHexString {
+                PDFObject.hexString(operand).serialize(into: &line)
+            } else {
+                PDFObject.string(String(decoding: operand, as: UTF8.self)).serialize(into: &line)
+            }
+        } else {
+            PDFObject.string(encodableASCII(text)).serialize(into: &line)
+        }
         line.append(contentsOf: Array(" Tj".utf8))
         emitRaw(line)
         emit("ET")
@@ -147,6 +166,9 @@ public final class DrawingContext {
 
     /// The advance width of `text` in the current font/size (points).
     public func textWidth(_ text: String) -> Double {
+        if let embedded = state.embedded {
+            return embedded.width(of: text, size: state.fontSize)
+        }
         guard let font = state.font else { return 0 }
         return textWidth(text, font: font, size: state.fontSize)
     }

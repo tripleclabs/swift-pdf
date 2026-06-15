@@ -37,8 +37,8 @@ let package = Package(
         .target(name: "PDFFonts", dependencies: ["PDFCore", "CHarfBuzz"]),
 
         // Public umbrella. Re-exports PDFCore and wires in the optional
-        // capability layers (PDFFlate now; PDFFonts / PDFImage later).
-        .target(name: "SwiftPDF", dependencies: ["PDFCore", "PDFFlate"]),
+        // capability layers (PDFFlate, PDFFonts; PDFImage later).
+        .target(name: "SwiftPDF", dependencies: ["PDFCore", "PDFFlate", "PDFFonts"]),
 
         // Dev CLI: `swift run samples [output-dir]` writes showcase PDFs so the
         // current feature set can be eyeballed in a real viewer.
@@ -46,7 +46,7 @@ let package = Package(
 
         .testTarget(name: "PDFCoreTests", dependencies: ["PDFCore"]),
         .testTarget(name: "SwiftPDFTests", dependencies: ["SwiftPDF", "CZlib"]),
-        .testTarget(name: "PDFFontsTests", dependencies: ["PDFFonts"],
+        .testTarget(name: "PDFFontsTests", dependencies: ["PDFFonts", "PDFCore"],
                     resources: [.copy("Fixtures")]),
     ]
 )

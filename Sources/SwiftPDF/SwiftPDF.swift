@@ -5,6 +5,7 @@
 // optional capability layers so consumers `import SwiftPDF` and get everything.
 @_exported import PDFCore
 @_exported import PDFFlate
+@_exported import PDFFonts
 
 extension PDFDocument {
     /// Enable FlateDecode compression of stream payloads (links zlib).
