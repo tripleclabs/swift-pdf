@@ -12,7 +12,8 @@ A pure-Swift PDF generation library for Linux and macOS. No libharu.
 - **Vector graphics** — paths (lines, Béziers, rects, ellipses), fill/stroke/clip
   (nonzero + even-odd), RGB/CMYK/Gray colour, line attributes, dashes, transforms,
   scoped graphics state
-- **Text** — the 14 standard fonts with correct metrics, and **embedded TTF/OTF**
+- **Text** — the 14 standard fonts with correct metrics and full **WinAnsi
+  (Latin-1 / cp1252)** support (German, French, Spanish, €, smart quotes), and **embedded TTF/OTF**
   fonts (HarfBuzz shaping + subsetting, Type0/CIDFontType2, `/ToUnicode` so text
   stays selectable/searchable)
 - **Images** — PNG (with alpha → `/SMask`) and JPEG (DCTDecode passthrough)

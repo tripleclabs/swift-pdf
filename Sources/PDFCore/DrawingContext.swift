@@ -165,7 +165,13 @@ public final class DrawingContext {
                 PDFObject.string(String(decoding: operand, as: UTF8.self)).serialize(into: &line)
             }
         } else {
-            PDFObject.string(encodableASCII(text)).serialize(into: &line)
+            // Standard-14 fonts: emit WinAnsi bytes as a literal string.
+            line.append(UInt8(ascii: "("))
+            for byte in WinAnsi.encode(text) {
+                if byte == 0x28 || byte == 0x29 || byte == 0x5C { line.append(0x5C) }
+                line.append(byte)
+            }
+            line.append(UInt8(ascii: ")"))
         }
         line.append(contentsOf: Array(" Tj".utf8))
         emitRaw(line)
@@ -210,11 +216,6 @@ public final class DrawingContext {
         }
         guard let font = state.font else { return 0 }
         return textWidth(text, font: font, size: state.fontSize)
-    }
-
-    /// Drop characters outside printable ASCII for now (M4 limitation).
-    private func encodableASCII(_ text: String) -> String {
-        String(String.UnicodeScalarView(text.unicodeScalars.filter { $0.value >= 0x20 && $0.value <= 0x7E }))
     }
 
     // MARK: - Internals

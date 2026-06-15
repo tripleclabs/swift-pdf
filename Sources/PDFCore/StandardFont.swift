@@ -60,14 +60,14 @@ public enum StandardFont: Sendable, CaseIterable, Equatable {
     public var capHeight: Int { table.capHeight }
 
     /// Advance width of a character (1000-unit em) for this font's encoding.
-    /// Latin fonts index printable ASCII (0x20…0x7E == WinAnsi over that range);
-    /// symbolic fonts index the font-specific code directly.
+    /// Latin fonts index WinAnsiEncoding (0x20…0xFF); symbolic fonts index the
+    /// font-specific code directly.
     func advanceWidth(forCode code: Int) -> Int {
         let widths = table.widths
         if isSymbolic {
             return (code >= 0 && code < widths.count) ? widths[code] : Base14Metrics.missingWidth
         }
-        guard code >= 0x20, code <= 0x7E else { return Base14Metrics.missingWidth }
+        guard code >= 0x20, code <= 0xFF else { return Base14Metrics.missingWidth }
         return widths[code - 0x20]
     }
 
@@ -77,11 +77,15 @@ public enum StandardFont: Sendable, CaseIterable, Equatable {
     }
 
     /// Advance width of `text` at `size` points (context-free; usable for
-    /// layout before any page exists). Only printable ASCII is measured in M4.
+    /// layout before any page exists). Latin fonts measure via WinAnsiEncoding.
     public func width(of text: String, size: Double) -> Double {
         var units = 0
         for scalar in text.unicodeScalars {
-            units += advanceWidth(forCode: Int(scalar.value))
+            if isSymbolic {
+                units += advanceWidth(forCode: Int(scalar.value))
+            } else if let byte = WinAnsi.byte(for: scalar.value) {
+                units += advanceWidth(forCode: Int(byte))
+            }
         }
         return Double(units) * size / 1000.0
     }

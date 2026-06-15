@@ -79,14 +79,25 @@ final class TextTests: XCTestCase {
         XCTAssertFalse(around.contains("WinAnsi"))
     }
 
-    func testNonAsciiCharactersDropped() {
-        // M4 limitation: only printable ASCII is encoded.
+    func testWinAnsiEncodesLatin1() {
+        // German text is encoded to WinAnsi bytes (not dropped).
         let page = PDFPage(size: .a4)
         page.draw { ctx in
             ctx.setFont(.helvetica, size: 12)
-            ctx.show("A\u{00E9}B", at: .zero)   // "AéB" -> "AB"
+            ctx.show("Grüße", at: .zero)
         }
-        let s = String(decoding: page.content, as: UTF8.self)
-        XCTAssertTrue(s.contains("(AB) Tj"))
+        // bytes: G(0x47) r(0x72) ü(0xFC) ß(0xDF) e(0x65) inside ( ... ) Tj
+        let want: [UInt8] = [0x28, 0x47, 0x72, 0xFC, 0xDF, 0x65, 0x29]
+        XCTAssertNotNil(page.content.firstRange(of: want), "Grüße encoded as WinAnsi bytes")
+    }
+
+    func testWinAnsiWidthsCoverAccents() {
+        // ä/ö/ü all advance 556 in Helvetica; ß advances 611.
+        XCTAssertEqual(StandardFont.helvetica.advanceWidth(forCode: 0xE4), 556)   // ä
+        XCTAssertEqual(StandardFont.helvetica.advanceWidth(forCode: 0xDF), 611)   // ß
+        // Measured width of "ä" equals one adieresis advance at the size.
+        XCTAssertEqual(StandardFont.helvetica.width(of: "ä", size: 10), 5.56, accuracy: 1e-9)
+        // Euro sign (cp1252 0x80 block) is representable via its Unicode scalar.
+        XCTAssertEqual(WinAnsi.byte(for: 0x20AC), 0x80)
     }
 }
