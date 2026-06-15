@@ -142,11 +142,7 @@ public final class DrawingContext {
 
     /// The advance width of `text` in the given font and size (points).
     public func textWidth(_ text: String, font: StandardFont, size: Double) -> Double {
-        var units = 0
-        for scalar in text.unicodeScalars {
-            units += font.advanceWidth(forCode: Int(scalar.value))
-        }
-        return Double(units) * size / 1000.0
+        font.width(of: text, size: size)
     }
 
     /// The advance width of `text` in the current font/size (points).

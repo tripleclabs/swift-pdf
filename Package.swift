@@ -22,6 +22,10 @@ let package = Package(
         // wire in PDFFlate / PDFFonts / PDFImage here.
         .target(name: "SwiftPDF", dependencies: ["PDFCore"]),
 
+        // Dev CLI: `swift run samples [output-dir]` writes showcase PDFs so the
+        // current feature set can be eyeballed in a real viewer.
+        .executableTarget(name: "samples", dependencies: ["SwiftPDF"]),
+
         .testTarget(name: "PDFCoreTests", dependencies: ["PDFCore"]),
     ]
 )

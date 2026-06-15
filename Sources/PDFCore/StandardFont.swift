@@ -71,6 +71,16 @@ public enum StandardFont: Sendable, CaseIterable, Equatable {
         return widths[code - 0x20]
     }
 
+    /// Advance width of `text` at `size` points (context-free; usable for
+    /// layout before any page exists). Only printable ASCII is measured in M4.
+    public func width(of text: String, size: Double) -> Double {
+        var units = 0
+        for scalar in text.unicodeScalars {
+            units += advanceWidth(forCode: Int(scalar.value))
+        }
+        return Double(units) * size / 1000.0
+    }
+
     /// The `/Font` resource dictionary for this font.
     func fontDictionary() -> PDFObject {
         var pairs: [(String, PDFObject)] = [
