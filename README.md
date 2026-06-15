@@ -2,9 +2,23 @@
 
 A pure-Swift PDF generation library for Linux and macOS. No libharu.
 
-> **Status: early development.** Building toward a `0.1.0` MVP (multi-page vector
-> graphics, base-14 and embedded TTF/OTF fonts, PNG/JPEG images, Flate
-> compression). Currently at the M1 core foundation.
+> **Status: `0.1.0` MVP feature-complete.** Multi-page documents, vector
+> graphics, the 14 standard fonts plus embedded/subset TTF/OTF, PNG & JPEG
+> images, and Flate compression — all validated against PDFKit.
+
+## Features
+
+- **Documents** — multi-page, page sizes/orientation, `/Info` metadata
+- **Vector graphics** — paths (lines, Béziers, rects, ellipses), fill/stroke/clip
+  (nonzero + even-odd), RGB/CMYK/Gray colour, line attributes, dashes, transforms,
+  scoped graphics state
+- **Text** — the 14 standard fonts with correct metrics, and **embedded TTF/OTF**
+  fonts (HarfBuzz shaping + subsetting, Type0/CIDFontType2, `/ToUnicode` so text
+  stays selectable/searchable)
+- **Images** — PNG (with alpha → `/SMask`) and JPEG (DCTDecode passthrough)
+- **Compression** — FlateDecode stream compression
+
+Try it: `swift run samples` writes showcase PDFs into `Samples/`.
 
 ## Design
 
