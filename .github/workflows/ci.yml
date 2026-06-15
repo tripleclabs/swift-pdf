@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    name: Linux ${{ matrix.arch }} (Swift, full)
+    runs-on: ${{ matrix.runner }}
+    container: swift:6.1
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm   # GitHub-hosted arm64 runner
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native dependencies
+        run: |
+          apt-get update
+          apt-get install -y libharfbuzz-dev libpng-dev zlib1g-dev pkg-config
+      - name: Build
+        run: swift build
+      - name: Test
+        run: swift test
+
+  linux-core-only:
+    name: Linux (PDFCore, no native deps)
+    runs-on: ubuntu-latest
+    container: swift:6.1
+    steps:
+      - uses: actions/checkout@v4
+      # Deliberately install NOTHING — proves PDFCore (base-14 text + vector
+      # graphics) builds and tests with zero native dependencies.
+      - name: Build PDFCore
+        run: swift build --target PDFCore
+      - name: Test PDFCore
+        run: swift test --filter PDFCoreTests
+
+  macos:
+    name: macOS (Swift, full)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native dependencies
+        run: brew install harfbuzz libpng pkg-config
+      - name: Build & test
+        run: |
+          export PKG_CONFIG_PATH="$(brew --prefix)/lib/pkgconfig:$(brew --prefix harfbuzz)/lib/pkgconfig:$(brew --prefix libpng)/lib/pkgconfig"
+          swift build
+          swift test

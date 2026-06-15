@@ -19,20 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Portions of this library (confined to files under Sources/PDFCore/LibHaruDerived/)
-are derived from libharu (the Haru Free PDF Library) and carry, in-file, the
-original permissive notice required by that project:
-
-    Copyright (c) 1999-2006 Takeshi Kanno
-    Copyright (c) 2007-2009 Antony Dovgal
-
-    Permission to use, copy, modify, distribute and sell this software and its
-    documentation for any purpose is hereby granted without fee, provided that
-    the above copyright notice appear in all copies and that both that
-    copyright notice and this permission notice appear in supporting
-    documentation. It is provided "as is" without express or implied warranty.
-
-All other files in this repository are original work under the MIT License above.
